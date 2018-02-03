@@ -1,0 +1,28 @@
+pkgname=riecoin-xptminer-git
+pkgver=r57.d034bc8
+pkgrel=1
+pkgdesc="Riecoin miner"
+arch=('x86_64')
+url="https://github.com/gatra/fastrie"
+license=('custom')
+makedepends=('git' 'cmake')
+depends=('boost-libs' 'boost')
+source=('git+https://github.com/gatra/fastrie.git')
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/fastrie/xptMiner"
+  ( set -o pipefail
+    git describe --long 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  )
+}
+
+build() {
+    cd "$srcdir/fastrie/xptMiner"
+    make
+}
+
+package() {
+    install -D -m755 "$srcdir/fastrie/xptMiner/xptminer" -t "$pkgdir/usr/bin/"
+}

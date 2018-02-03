@@ -1,0 +1,34 @@
+pkgname=aeon-git
+pkgver=r210.17ee55f
+pkgrel=1
+pkgdesc="Aeon Wallet and miner"
+arch=('x86_64')
+url="https://github.com/aeonix/aeon"
+license=('custom')
+makedepends=('git' 'cmake')
+depends=('boost-libs' 'boost')
+source=('git+https://github.com/aeonix/aeon.git')
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/aeon"
+  ( set -o pipefail
+    git describe --long 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  )
+}
+
+build() {
+    cd "$srcdir/aeon"
+    mkdir -p build/release
+    cd build/release
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-fassociative-math" -DCMAKE_CXX_FLAGS="-fassociative-math" ../..
+    make
+}
+
+package() {
+    install -D -m755 "$srcdir/aeon/build/release/src/aeond" -t "$pkgdir/usr/bin/"
+    install -D -m755 "$srcdir/aeon/build/release/src/connectivity_tool" -t "$pkgdir/usr/bin/"
+    install -D -m755 "$srcdir/aeon/build/release/src/simpleminer" -t "$pkgdir/usr/bin/"
+    install -D -m755 "$srcdir/aeon/build/release/src/simplewallet" -t "$pkgdir/usr/bin/"
+}
